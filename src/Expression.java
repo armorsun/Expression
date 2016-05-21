@@ -1,10 +1,8 @@
-import com.sun.xml.internal.xsom.impl.scd.Iterators;
+import edu.princeton.cs.algs4.LinkedQueue;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class Expression{
   
@@ -12,6 +10,7 @@ public class Expression{
     private List<String> infixAryList= new ArrayList<>();
     private Stack<Node> valueStack = new Stack<>();
     private Stack<String> operatorStack = new Stack<>();
+    private int num=0;
 
     // DO NOT MODIFY THIS
     public Expression(){}
@@ -25,9 +24,10 @@ public class Expression{
         for (int i = 0; i < tmpChar.length; i++) {
             infixAryList.add(String.valueOf(tmpChar[i]));
             String t=infixAryList.get(i);
-            if (t.equals("(")) ;
+            if (t.equals("("));
             else if (t.equals("+") || t.equals("-") || t.equals("*") || t.equals("/")) {
                 operatorStack.push(t);
+                num++;
             }else if(t.equals(")")) {
                 if(root==null) {
                     nodeR = new Node(null, null, valueStack.pop().getValue());
@@ -41,27 +41,89 @@ public class Expression{
             }else {
                 Node tmpNode=new Node(null,null,t);
                 valueStack.push(tmpNode);
+                num++;
             }
         }
         return root;
     }
 
     public Node[] PrintPrefix(){
-        Node[] prefix = null;
+       if(root==null) throw new NullPointerException();
+        Node[] prefix = new Node[num];
+        LinkedQueue<Node> q=new LinkedQueue<>();
+//        Queue<Node> q = new LinkedList<>();
+        pre(root,q);
+        int n=q.size();
+        for (int i = 0; i < n; i++) {
+//            System.out.println(q.remove().getValue());
+//            prefix[i]=q.remove();
+            prefix[i] = q.dequeue();
+        }
         return prefix;
     }
-  
-    public Node[] PrintPostfix(){
-        Node[] postfix = null;
-        while(root.getLeft()==null&&root.getRight()==null){
 
+    private void pre(Node node, LinkedQueue<Node> q){
+        if(node.getLeft()!=null && node.getRight()!=null)q.enqueue(node);
+        if(node.getLeft()==null && node.getRight()==null){
+            q.enqueue(node);
+            return;
+        }
+        pre(node.getLeft(), q);
+        pre(node.getRight(), q);
+        return;
+    }
+
+    public Node[] PrintPostfix(){
+        if(root==null) throw new NullPointerException();
+        Node[] postfix = new Node[num];
+//        Queue<Node> q = new LinkedList<>();
+        LinkedQueue<Node> q=new LinkedQueue<>();
+        post(root,q);
+        int n=q.size();
+        for (int i = 0; i < n; i++) {
+//            System.out.println(q.remove().getValue());
+            postfix[i]=q.dequeue();
         }
         return postfix;
     }
 
-    public double Evaluation(){
-        double answer = 0;
+    private void post(Node node, LinkedQueue<Node> q){
+        if(node.getLeft()==null && node.getRight()==null){
+            q.enqueue(node);
+            return;
+        }
+        post(node.getLeft(), q);
+        post(node.getRight(), q);
+        q.enqueue(node);
+        return;
+    }
 
+    public double Evaluation(){
+        if(root==null) throw new NullPointerException();
+        double answer = 0;
+        Stack<Double> vStack = new Stack<>();
+        Stack<String> oStack = new Stack<>();
+        for (int i = 0; i < infixAryList.size(); i++) {
+            String t = infixAryList.get(i);
+            if (t.equals("(")) ;
+            else if (t.equals("+") || t.equals("-") || t.equals("*") || t.equals("/")) {
+                oStack.push(t);
+            } else if (t.equals(")")) {
+                String op = oStack.pop();
+                if (op.equals("+")) {
+                    vStack.push(vStack.pop() + vStack.pop());
+                } else if (op.equals("-")) {
+                    vStack.push(-(vStack.pop() - vStack.pop()));
+                } else if (op.equals("*")) {
+                    vStack.push(vStack.pop() * vStack.pop());
+                } else if (op.equals("/")) {
+                    vStack.push(1 / (vStack.pop() / vStack.pop()));
+                }
+            } else {
+                vStack.push(Double.parseDouble(t));
+            }
+        }
+        answer = vStack.pop();
         return answer;
     }
     public static void main(String[] args)throws Exception {
@@ -70,6 +132,18 @@ public class Expression{
             String infix=br.readLine();
 //            System.out.println(infix);
             expression.Infix2BT(infix);
+            Node n1[]=expression.PrintPostfix();
+            Node n2[]=expression.PrintPrefix();
+
+            for (int i = 0; i < n1.length; i++) {
+                System.out.println(n1[i].getValue());
+            }
+            System.out.println("\n");
+            for (int i = 0; i < n2.length; i++) {
+                System.out.println(n2[i].getValue());
+            }
+
+            System.out.println(expression.Evaluation());
         }
     }
 }
