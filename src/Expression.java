@@ -1,5 +1,4 @@
 import edu.princeton.cs.algs4.LinkedQueue;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.*;
@@ -20,12 +19,11 @@ public class Expression{
         char tmpChar[]=infix.toCharArray();
         Node nodeL;
         Node nodeR;
-
         char charTmp=' ';
         int indexForDupNum=0;
         for (int i = 0; i < tmpChar.length; i++) {
             char charNow = tmpChar[i];
-            if ((charTmp <= 57 && charTmp >= 48) && (charNow <= 57 && charNow >= 48)) {
+            if (((charTmp <= 57 && charTmp >= 48)|| charTmp==46) && ((charNow <= 57 && charNow >= 48) ||charNow==46)) {
                 indexForDupNum--;
                 infixAryList.add(indexForDupNum, infixAryList.get(indexForDupNum).concat(String.valueOf(charNow)));
                 infixAryList.remove(++indexForDupNum);
@@ -146,13 +144,22 @@ public class Expression{
             Node n2[]=expression.PrintPrefix();
 
             for (int i = 0; i < n1.length; i++) {
-                System.out.println(n1[i].getValue());
+                System.out.print(n1[i].getValue()+" ");
             }
             System.out.println("\n");
             for (int i = 0; i < n2.length; i++) {
-                System.out.println(n2[i].getValue());
+                System.out.print(n2[i].getValue()+" ");
             }
+            System.out.println("\n");
             System.out.println(expression.Evaluation());
+            expression.Infix2BT(infix);
+            Expression expression2= new Expression();
+            expression2.Infix2BT("(4+(((4*2)/2)/3))");
+            Node n3[]=expression2.PrintPostfix();
+            for (int i = 0; i < n3.length; i++) {
+                System.out.print(n3[i].getValue()+" ");
+            }
+
         }
     }
 }
