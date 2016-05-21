@@ -21,8 +21,22 @@ public class Expression{
         Node nodeL;
         Node nodeR;
 
+        char charTmp=' ';
+        int indexForDupNum=0;
         for (int i = 0; i < tmpChar.length; i++) {
-            infixAryList.add(String.valueOf(tmpChar[i]));
+            char charNow = tmpChar[i];
+            if ((charTmp <= 57 && charTmp >= 48) && (charNow <= 57 && charNow >= 48)) {
+                indexForDupNum--;
+                infixAryList.add(indexForDupNum, infixAryList.get(indexForDupNum).concat(String.valueOf(charNow)));
+                infixAryList.remove(++indexForDupNum);
+            } else {
+                infixAryList.add(String.valueOf(tmpChar[i]));
+                indexForDupNum++;
+            }
+            charTmp =tmpChar[i];
+        }
+
+        for (int i = 0; i < infixAryList.size(); i++) {
             String t=infixAryList.get(i);
             if (t.equals("("));
             else if (t.equals("+") || t.equals("-") || t.equals("*") || t.equals("/")) {
@@ -55,8 +69,6 @@ public class Expression{
         pre(root,q);
         int n=q.size();
         for (int i = 0; i < n; i++) {
-//            System.out.println(q.remove().getValue());
-//            prefix[i]=q.remove();
             prefix[i] = q.dequeue();
         }
         return prefix;
@@ -81,7 +93,6 @@ public class Expression{
         post(root,q);
         int n=q.size();
         for (int i = 0; i < n; i++) {
-//            System.out.println(q.remove().getValue());
             postfix[i]=q.dequeue();
         }
         return postfix;
@@ -100,7 +111,7 @@ public class Expression{
 
     public double Evaluation(){
         if(root==null) throw new NullPointerException();
-        double answer = 0;
+        double answer;
         Stack<Double> vStack = new Stack<>();
         Stack<String> oStack = new Stack<>();
         for (int i = 0; i < infixAryList.size(); i++) {
@@ -130,7 +141,6 @@ public class Expression{
         try (BufferedReader br = new BufferedReader(new FileReader(args[0]))) {
             Expression expression= new Expression();
             String infix=br.readLine();
-//            System.out.println(infix);
             expression.Infix2BT(infix);
             Node n1[]=expression.PrintPostfix();
             Node n2[]=expression.PrintPrefix();
@@ -142,7 +152,6 @@ public class Expression{
             for (int i = 0; i < n2.length; i++) {
                 System.out.println(n2[i].getValue());
             }
-
             System.out.println(expression.Evaluation());
         }
     }
